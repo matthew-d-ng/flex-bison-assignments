@@ -491,11 +491,11 @@ static const yytype_uint16 yytoknum[] =
 static const yytype_int8 yypact[] =
 {
      -17,     5,   -17,    47,    12,    48,    13,    49,    16,    19,
-      27,     6,    -5,   -17,   -17,   -17,    56,    34,    41,    39,
+      27,     6,    -6,   -17,   -17,   -17,    56,    34,    41,    39,
      -17,   -17,    60,    59,   -17,   -17,    62,    61,   -17,   -17,
       63,    64,    10,    27,    27,   -17,    27,    27,   -17,   -17,
       56,   -17,    56,    34,   -17,    66,   -17,    67,   -17,    68,
-     -17,   -17,    -5,    -5,   -17,   -17,   -17,   -17,   -17,    56,
+     -17,   -17,    -6,    -6,   -17,   -17,   -17,   -17,   -17,    56,
      -17,   -17,   -17,   -17
 };
 
@@ -509,7 +509,7 @@ static const yytype_uint8 yydefact[] =
       30,    35,    32,    43,    41,    36,    39,    52,    50,    45,
       48,    55,     0,     0,     0,     3,     0,     0,    24,    22,
       21,    18,    17,    15,    29,    33,    42,    38,    51,    47,
-      54,    11,     5,     6,     9,     8,    20,    16,    14,    13,
+      54,    11,     5,     6,     8,     9,    20,    16,    14,    13,
       34,    37,    46,    12
 };
 
@@ -542,7 +542,7 @@ static const yytype_uint8 yytable[] =
 
 static const yytype_int8 yycheck[] =
 {
-      16,    17,    18,    17,    18,     0,    11,    12,     3,     4,
+      16,    17,    18,    17,    18,     0,    12,    13,     3,     4,
        5,     6,     7,     8,     9,     3,    10,    11,     5,    14,
       10,    11,    16,     7,    40,    15,    42,    43,     9,    43,
        3,     4,     5,     6,     7,     8,     9,     3,     4,     5,
@@ -559,7 +559,7 @@ static const yytype_uint8 yystos[] =
        0,    18,     0,     3,     4,     5,     6,     7,     8,     9,
       14,    19,    20,    21,    22,    23,    24,    25,    26,     3,
        4,     5,     3,     5,     6,     7,     5,     7,     8,     9,
-       7,     9,    19,    10,    11,    16,    11,    12,    23,    23,
+       7,     9,    19,    10,    11,    16,    12,    13,    23,    23,
       24,    23,    24,    25,     3,     3,     5,     5,     7,     7,
        9,    15,    20,    20,    21,    21,    23,    23,    23,    24,
        3,     5,     7,    23
@@ -1774,127 +1774,78 @@ yyreturn:
 #line 95 "romcalc.y" /* yacc.c:1906  */
 
 
-void add_roman_unit(char** romanNum, const char** symbols, int num)
+char* add_roman_unit(char* romanNum, char** symbols, int num)
 {
-  size_t charsize = sizeof(romanNum[0]);
-  
+  char* newRoman = NULL;
   if (num != 0) {
-    char* newRoman;
-    char* old = *romanNum;
-    switch (num) {
-    
-    case 1:
-      newRoman = calloc( sizeof(old) + 1, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[0], 1);
-      break;
-      
-    case 2:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[1], 2);
-      break;    
-      
-    case 3:
-      newRoman = calloc( sizeof(old) + 3, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[2], 3);
-      break;    
-      
-    case 4:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[3], 2);
-      break;
-      
-    case 5:
-      newRoman = calloc( sizeof(old) + 1, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[4], 1);  
-      break;
-      
-    case 6:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[5], 2);  
-      break;
-      
-    case 7:
-      newRoman = calloc( sizeof(old) + 3, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[6], 3);  
-      break;
-      
-    case 8:
-      newRoman = calloc( sizeof(old) + 4, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[7], 4);  
-      break;
-      
-    case 9:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[8], 2);  
-      break;
-    
-    default:
-      newRoman = *romanNum;
+    char* symbol = symbols[num-1];
+    newRoman = calloc( sizeof(romanNum) + strlen(symbol), 1);
+    if (newRoman) {
+        newRoman = strncpy(newRoman, romanNum, strlen(romanNum));
+        newRoman = strncat(newRoman, symbol, strlen(symbol));
     }
-    
-    romanNum = &newRoman; 
-    free(old);
+    else
+      yyerror("Ran out of memory");
   }
+  return newRoman;
 }
 
 char* to_roman(int num) 
 {
   if (num == 0)
     return "Z";   // actually should be nullus B)
-    
-  char* romanNum[1];
-  size_t charsize = sizeof(romanNum[0]);
+
+  char* romanNum = "";
+  
   if (num < 0) {
-    char* newRoman = calloc( sizeof(romanNum) + 1, charsize );
+    char* newRoman = calloc( sizeof(romanNum) + 1, 1 );
     if (!newRoman)
-      yyerror("Ran out of memory\n");
-      
-    newRoman = strncpy(newRoman, romanNum, sizeof(romanNum));
+      yyerror("Ran out of memory");
+
+    newRoman = strncpy(newRoman, romanNum, strlen(romanNum));
     newRoman = strncat(newRoman, "-", 1);
-    char* old = romanNum;
     romanNum = newRoman;
-    free(old);
     num = -num;
+
   }
   
   // assign thousands
-  if (num % 1000 == 0)
+  if (num / 1000 > 0)
   {
-    for ( int rem = num; rem > 0; rem -= 1000) {
-      char* newRoman = calloc( sizeof(romanNum) + 1, charsize );
+    int rem;
+    for ( rem = num; rem >= 1000; rem -= 1000) {
+      char* newRoman = calloc( sizeof(romanNum) + 1, 1 );
       if (!newRoman)
-        yyerror("Ran out of memory\n");
+        yyerror("Ran out of memory");
         
       newRoman = strncpy(newRoman, romanNum, strlen(romanNum));
       newRoman = strncat(newRoman, "M", 1);
-      char* old = romanNum;
       romanNum = newRoman;
-      free(old);
     }
   }
   
   // assign hundreds
   num = num % 1000;
-  int hund = num / 100;
-  add_roman_unit(&romanNum, SYM_HUNDREDS, num);
+  char* newRoman = add_roman_unit(romanNum, SYM_HUNDREDS, num/100);
+  if (newRoman) {
+    romanNum = newRoman;
+  }
+  newRoman = NULL;
+
    // assign tens
   num = num % 100;
-  int ten = num / 10;
-  add_roman_unit(&romanNum, SYM_TENS, num);
+  newRoman = add_roman_unit(romanNum, SYM_TENS, num/10);
+  if (newRoman) {
+    romanNum = newRoman;
+  }
+  newRoman = NULL;
 
   // assign ones
   num = num % 10;
-  add_roman_unit(&romanNum, SYM_ONES, num);
-  
+  newRoman = add_roman_unit(romanNum, SYM_ONES, num);
+  if (newRoman) {
+    romanNum = newRoman;
+  }
   return romanNum;
 }
 
@@ -1906,7 +1857,7 @@ int main()
 
 void yyerror(char* s)
 {
-  printf(s);
+  printf("%s\n", s);
   exit(0);
 }
 
