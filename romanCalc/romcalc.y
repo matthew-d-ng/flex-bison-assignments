@@ -30,7 +30,7 @@ expr: factor
  
 factor: inner_expr
  | factor MUL inner_expr          { $$ = $1 * $3; }
- | factor SUB inner_expr          { $$ = $1 / $3; }
+ | factor DIV inner_expr          { $$ = $1 / $3; }
  ;
  
 inner_expr: num
@@ -94,76 +94,20 @@ thousands: THOUSAND THOUSAND THOUSAND   { $$ = 3000; }
 
 %%
 
-char* add_roman_unit(char* romanNum, const char** symbols, int num)
+char* add_roman_unit(char* romanNum, char** symbols, int num)
 {
-  size_t charsize = sizeof(romanNum[0]);
-  
+  char* newRoman = NULL;
   if (num != 0) {
-    char* newRoman;
-    char* old = *romanNum;
-    switch (num) {
-    
-    case 1:
-      newRoman = calloc( sizeof(old) + 1, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[0], 1);
-      break;
-      
-    case 2:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[1], 2);
-      break;    
-      
-    case 3:
-      newRoman = calloc( sizeof(old) + 3, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[2], 3);
-      break;    
-      
-    case 4:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[3], 2);
-      break;
-      
-    case 5:
-      newRoman = calloc( sizeof(old) + 1, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[4], 1);  
-      break;
-      
-    case 6:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[5], 2);  
-      break;
-      
-    case 7:
-      newRoman = calloc( sizeof(old) + 3, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[6], 3);  
-      break;
-      
-    case 8:
-      newRoman = calloc( sizeof(old) + 4, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[7], 4);  
-      break;
-      
-    case 9:
-      newRoman = calloc( sizeof(old) + 2, charsize );
-      newRoman = strncpy(newRoman, old, strlen(old));
-      newRoman = strncat(newRoman, symbols[8], 2);  
-      break;
-    
-    default:
-      newRoman = *romanNum;
+    char* symbol = symbols[num-1];
+    newRoman = calloc( sizeof(romanNum) + strlen(symbol), 1);
+    if (newRoman) {
+        newRoman = strncpy(newRoman, romanNum, strlen(romanNum));
+        newRoman = strncat(newRoman, symbol, strlen(symbol));
     }
-    
-    romanNum = &newRoman; 
-    free(old);
+    else
+      yyerror("Ran out of memory");
   }
+  return newRoman;
 }
 
 char* to_roman(int num) 
@@ -171,50 +115,57 @@ char* to_roman(int num)
   if (num == 0)
     return "Z";   // actually should be nullus B)
 
-  char* romanNum[1];
-  size_t charsize = sizeof(romanNum[0]);
+  char* romanNum = "";
+  
   if (num < 0) {
-    char* newRoman = calloc( sizeof(romanNum) + 1, charsize );
+    char* newRoman = calloc( sizeof(romanNum) + 1, 1 );
     if (!newRoman)
-      yyerror("Ran out of memory\n");
-      
-    newRoman = strncpy(newRoman, romanNum, sizeof(romanNum));
+      yyerror("Ran out of memory");
+
+    newRoman = strncpy(newRoman, romanNum, strlen(romanNum));
     newRoman = strncat(newRoman, "-", 1);
-    char* old = romanNum;
     romanNum = newRoman;
-    free(old);
     num = -num;
+
   }
   
   // assign thousands
-  if (num % 1000 == 0)
+  if (num / 1000 > 0)
   {
-    for ( int rem = num; rem > 0; rem -= 1000) {
-      char* newRoman = calloc( sizeof(romanNum) + 1, charsize );
+    int rem;
+    for ( rem = num; rem >= 1000; rem -= 1000) {
+      char* newRoman = calloc( sizeof(romanNum) + 1, 1 );
       if (!newRoman)
-        yyerror("Ran out of memory\n");
+        yyerror("Ran out of memory");
         
       newRoman = strncpy(newRoman, romanNum, strlen(romanNum));
       newRoman = strncat(newRoman, "M", 1);
-      char* old = romanNum;
       romanNum = newRoman;
-      free(old);
     }
   }
   
   // assign hundreds
   num = num % 1000;
-  int hund = num / 100;
-  add_roman_unit(&romanNum, SYM_HUNDREDS, num);
+  char* newRoman = add_roman_unit(romanNum, SYM_HUNDREDS, num/100);
+  if (newRoman) {
+    romanNum = newRoman;
+  }
+  newRoman = NULL;
+
    // assign tens
   num = num % 100;
-  int ten = num / 10;
-  add_roman_unit(&romanNum, SYM_TENS, num);
+  newRoman = add_roman_unit(romanNum, SYM_TENS, num/10);
+  if (newRoman) {
+    romanNum = newRoman;
+  }
+  newRoman = NULL;
 
   // assign ones
   num = num % 10;
-  add_roman_unit(&romanNum, SYM_ONES, num);
-  
+  newRoman = add_roman_unit(romanNum, SYM_ONES, num);
+  if (newRoman) {
+    romanNum = newRoman;
+  }
   return romanNum;
 }
 
@@ -226,7 +177,7 @@ int main()
 
 void yyerror(char* s)
 {
-  printf(s);
+  printf("%s\n", s);
   exit(0);
 }
 

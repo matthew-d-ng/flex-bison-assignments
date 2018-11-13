@@ -25,6 +25,6 @@ M             { return THOUSAND; }
 
 [ /t]         { }
 \n            { return EOL; }
-.             { yyerror("syntax error\n"); }
+.             { yyerror("syntax error"); }
 %%
 
